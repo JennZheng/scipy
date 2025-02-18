@@ -1,4 +1,6 @@
 #include "_matfuncs_expm.h"
+#include <complex.h>
+
 
 // For some reason these defs are not picked up from the header.
 #if defined(_MSC_VER)
