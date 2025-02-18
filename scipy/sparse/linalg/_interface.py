@@ -255,6 +255,9 @@ class LinearOperator:
         if x.shape != (N,) and x.shape != (N,1):
             raise ValueError('dimension mismatch')
 
+        if not hasattr(self, '_matvec') or self._matvec is None:
+            raise TypeError("The matvec method is not implemented for this LinearOperator")
+
         y = self._matvec(x)
 
         if isinstance(x, np.matrix):
@@ -405,6 +408,8 @@ class LinearOperator:
             raise ValueError(f'dimension mismatch: {self.shape}, {X.shape}')
 
         try:
+            if self._rmatmat is None:
+                raise TypeError("The rmatmat method is not defined for this LinearOperator.")
             Y = self._rmatmat(X)
         except Exception as e:
             if issparse(X) or is_pydata_spmatrix(X):
@@ -426,7 +431,7 @@ class LinearOperator:
             return self.H.matmat(X)
 
     def __call__(self, x):
-        return self@x
+        return self*x
 
     def __mul__(self, x):
         return self.dot(x)
@@ -621,7 +626,7 @@ class _CustomLinearOperator(LinearOperator):
         if self.__rmatmat_impl is not None:
             return self.__rmatmat_impl(X)
         else:
-            return super()._rmatmat(X)
+            raise NotImplementedError("The rmatmat method is not implemented for this LinearOperator.")
 
     def _adjoint(self):
         return _CustomLinearOperator(shape=(self.shape[1], self.shape[0]),
